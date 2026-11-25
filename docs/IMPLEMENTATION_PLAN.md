@@ -126,7 +126,7 @@ consumer process can talk through it — this is what gives us real concurrency 
 | No panics on bad input | No `unwrap`/`expect`/`panic!` | `#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]` + fuzz test |
 | (c) Data only reachable through a lock; lock always released | `Mutex<RingState>` / `SpinLock<Stats>`; the guard is the *only* way to reach the data and unlocks in its `Drop` | Compiler enforces access; lockdep in the debug kernel checks ordering under stress |
 | Drop-based cleanup | Module struct owns the misc-device registration; storage is a `KVVec` (kmalloc/vmalloc wrapper that frees in `Drop`) | 100× load/unload cycles + `kmemleak` scan = 0 leaks |
-| Minimal, audited `unsafe` | Driver needs **exactly one** `unsafe` line (initialising the global lock, required by the 6.18 API), with a `// SAFETY:` justification | `#![deny(clippy::undocumented_unsafe_blocks)]` + a grep-based audit counted in the report |
+| Minimal, audited `unsafe` | `ring.rs`: none (`#![forbid(unsafe_code)]`). Driver: **one** `unsafe {}` block (initialising the two global locks once at load) plus the two `unsafe(uninit)` declarations the 6.18 `global_lock!` macro requires — all in the lock set-up, each with a `// SAFETY:` justification | `#![deny(clippy::undocumented_unsafe_blocks)]` + a grep-based audit counted in the report |
 
 **Design note — why a `Mutex` and not a `SpinLock` for the ring data.** Copying to/from user
 memory (`copy_to_user`) can page-fault and *sleep*. Sleeping while holding a spinlock is

@@ -16,8 +16,8 @@ Design and phases: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 | 0 Environment (WSL Ubuntu 26.04, LLVM 21, rustc 1.93, QEMU 10.2) | done |
 | 1 Linux 6.18.65 ARM64 kernels with `CONFIG_RUST=y`, BusyBox initramfs, QEMU board | done (perf kernel; debug kernel builds with the same script) |
 | 2 Panic-free ring-buffer core (`ringbuf-core/`) + host tests | done |
-| 3 Rust driver `/dev/rustring` | next |
-| 4 C driver + naive variants | — |
+| 3 Rust driver `/dev/rustring` (+ `ringctl` tool, smoke test: 16/16 on the board) | done |
+| 4 C driver + naive variants | next |
 | 5 Tests, fuzzing, benchmarks | — |
 | 6 Results & documentation | — |
 
@@ -39,15 +39,34 @@ bash env/02-build-kernel.sh debug        # KASAN/lockdep kernel (~25 min)
 bash env/03-build-busybox.sh             # static ARM64 BusyBox
 ```
 
-Build the modules and boot the board:
+Build the modules and tools, then boot the board:
 
 ```bash
 bash scripts/build-modules.sh perf       # every drivers/*/ against the perf kernel
+make -C userspace                        # static ARM64 tools -> /tests on the board
 bash qemu/run.sh                         # interactive shell on the emulated board
-#   rr-board# insmod /modules/rr_hello.ko ; dmesg | tail ; rmmod rr_hello
-#   rr-board# poweroff -f                # (or Ctrl-A X) to quit QEMU
-bash qemu/run.sh -r hello.sh             # run a test unattended and power off
+bash qemu/run.sh -r rustring_smoke.sh    # run a test unattended and power off
 bash qemu/run.sh -k debug                # same, on the debug kernel
+```
+
+On the board (`/tests` is on `PATH`):
+
+```sh
+insmod /modules/rustring.ko
+echo "hello ring" > /dev/rustring
+ringctl /dev/rustring stats              # capacity / used / counters
+ringctl /dev/rustring peek 0 5           # look without consuming
+cat /dev/rustring                        # drain
+ringctl /dev/rustring peek 18446744073709551615 2; echo $?   # 22 = EINVAL, no crash
+rmmod rustring
+poweroff -f                              # or Ctrl-A X to quit QEMU
+```
+
+Kernel-side lint gate (fails the build on `buf[i]`, unchecked arithmetic, `unwrap`...):
+
+```bash
+source env/common.sh
+make -C $KBUILD_PERF M=$PWD/drivers/rust MO=$WORK/modules/perf/rust LLVM=1 ARCH=arm64 CLIPPY=1 modules
 ```
 
 Host-side tests of the ring-buffer logic (no kernel needed):

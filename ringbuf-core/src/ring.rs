@@ -221,10 +221,13 @@ where
         let first_len = free.min(to_end);
         let second_len = free.checked_sub(first_len).ok_or(RingError::OutOfRange)?;
 
-        let (lo, hi) = self
-            .storage
-            .split_at_mut_checked(tail)
-            .ok_or(RingError::OutOfRange)?;
+        // `split_at_mut` panics if `tail > len`; the explicit check makes that
+        // branch unreachable. (`split_at_mut_checked` would say this directly
+        // but needs Rust 1.80, and Linux 6.18 supports Rust >= 1.78.)
+        if tail > self.storage.len() {
+            return Err(RingError::OutOfRange);
+        }
+        let (lo, hi) = self.storage.split_at_mut(tail);
         let first = hi.get_mut(..first_len).ok_or(RingError::OutOfRange)?;
         let second = lo.get_mut(..second_len).ok_or(RingError::OutOfRange)?;
         Ok((first, second))

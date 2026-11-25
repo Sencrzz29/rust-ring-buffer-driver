@@ -5,6 +5,8 @@
 #   rr.run=<name>   run /tests/<name> unattended, print a result marker, power off
 #   (absent)        drop into an interactive shell on the serial console
 
+export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/tests
+
 mount -t proc     proc     /proc
 mount -t sysfs    sysfs    /sys
 mount -t devtmpfs devtmpfs /dev
