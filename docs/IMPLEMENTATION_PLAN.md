@@ -27,6 +27,7 @@ bandwidth, and crash resilience** — the three metrics the synopsis promises.
 | Decision | Choice | Why |
 |---|---|---|
 | Host Linux | **Existing WSL2 distro `Ubuntu` = Ubuntu 26.04 LTS** | Current LTS. The kernel's own Rust docs say Ubuntu ≥ 25.04 works "out of the box" with plain `apt install rustc rust-src bindgen …`; 24.04 needs versioned packages + manual symlinks. It is also nearly empty (no compilers yet), so nothing will conflict. |
+| Storage | **Distro disk moved to the external drive: `E:\WSL\Ubuntu\ext4.vhdx`** (`wsl --manage Ubuntu --move`) | `C:` has ~22 GB free. The One Touch drive is exFAT, which is case-insensitive (the kernel has files like `xt_CONNMARK.h` *and* `xt_connmark.h`) and slow through `/mnt/e`, so we don't build on it directly. Instead the whole Linux disk image lives there; inside it is a normal ext4 filesystem. **Run `wsl --shutdown` before unplugging the drive.** |
 | Target kernel | **Linux 6.18.65 (longterm)** from kernel.org | Newest LTS (synopsis asks for "6.6+ LTS"). 6.18 is the first LTS where the Rust `miscdevice` API has `read_iter`/`write_iter`/`ioctl` — exactly what a character driver needs. LTS = APIs won't move under us. (Mainline is 7.4-rc, too unstable for a semester project.) |
 | Target board | **QEMU `virt`, ARM64 (Cortex-A57), TCG emulation** | Synopsis: "emulated ARM64 board". Cross-compiling for ARM64 is the realistic embedded workflow. |
 | Compiler | **LLVM/Clang 21 (`LLVM=1`)** + **rustc 1.93 (apt)** + **bindgen (apt)** | Synopsis: LLVM/Clang. Rust-for-Linux requires an LLVM-based C compiler so C and Rust objects agree on ABI. `make rustavailable` verifies the combination before we build. Fallback: pin a different Rust via `rustup` if 1.93 is rejected. |
@@ -46,7 +47,7 @@ flowchart LR
   subgraph WIN["Windows 11"]
     REPO["C:\\Users\\sujee\\Projects\\rust-ringbuf-driver<br/>(git repo, edited from Windows)"]
   end
-  subgraph WSL["WSL2 — Ubuntu 26.04"]
+  subgraph WSL["WSL2 — Ubuntu 26.04 (disk image on E:, One Touch)"]
     TC["clang/lld 21 · rustc 1.93 · bindgen<br/>aarch64 cross-gcc (user space)"]
     KSRC["~/rr/linux-6.18.65 (ext4)<br/>build-perf/ · build-debug/"]
     MOD["make -C kernel M=/mnt/c/.../drivers/*<br/>→ rustring.ko · cring.ko · *_naive.ko"]
@@ -245,10 +246,13 @@ works), not after every step.
 
 ## 10. Resources & risks
 
-**Disk:** ~12 GB will be written inside WSL's virtual disk, which lives on `C:` (you have
-~22 GB free). Mitigations: no debug info in the `perf` kernel, modules built only for our
-drivers (`mod2noconfig`), tarballs deleted after extraction. After the project,
-`wsl --manage Ubuntu --set-sparse true` lets Windows reclaim freed space.
+**Disk:** ~12 GB will be written inside WSL's virtual disk, which now lives on the external
+One Touch drive (`E:`, ~650 GB free), so `C:` is untouched. We still keep builds lean: no debug
+info in the `perf` kernel, modules built only for our drivers (`mod2noconfig`), tarballs
+deleted after extraction.
+
+**Status of §9:** plan approved; packages installed (clang/LLD 21.1.8, rustc 1.93.1,
+bindgen 0.72.1, QEMU 10.2.1, aarch64 gcc 15.2.0); git identity set; distro moved to `E:`.
 
 **Time:** Each kernel build ≈ 15–25 min on your Ryzen 5 7600X (12 threads, 7 GB RAM
 visible to WSL). Everything else is minutes.
