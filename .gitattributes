@@ -1,0 +1,15 @@
+# Everything is built and run inside Linux (WSL / QEMU), so force LF line
+# endings even when the repo is checked out on Windows. A CRLF in a shell
+# script or Kbuild file breaks the build in confusing ways.
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.rs   text eol=lf
+*.c    text eol=lf
+*.h    text eol=lf
+Makefile text eol=lf
+Kbuild   text eol=lf
+*.config text eol=lf
+
+*.pdf  binary
+*.png  binary

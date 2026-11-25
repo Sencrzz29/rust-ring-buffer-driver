@@ -1,0 +1,36 @@
+# Kbuild out-of-tree module artefacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.cmd
+*.rmeta
+*.d
+.*.cmd
+.*.d
+Module.symvers
+modules.order
+.tmp_versions/
+
+# Cargo (host-side unit tests)
+target/
+Cargo.lock
+
+# Userspace test binaries
+/userspace/build/
+
+# QEMU / initramfs scratch
+/build/
+*.cpio
+*.cpio.gz
+
+# Raw run logs (curated results are committed under results/)
+/results/raw/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
