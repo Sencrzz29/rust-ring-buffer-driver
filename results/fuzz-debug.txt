@@ -1,0 +1,24 @@
+# ringfuzz /dev/rustring iterations=20000 seed=0x2
+# write   calls=4355   ok=1748   EAGAIN=869 EFAULT=1738
+# read    calls=4058   ok=2534   EFAULT=1524
+# peek    calls=5188   ok=122    EFAULT=261 EINVAL=4805
+# resize  calls=1715   ok=355    EFAULT=27 EBUSY=444 EINVAL=889
+# clear   calls=844    ok=844   
+# stats   calls=1668   ok=1267   EFAULT=401
+# bogus   calls=1708   ok=0      ENOTTY=1708
+# reopen  calls=464    ok=464   
+# ringfuzz /dev/rustring: PASS iterations=20000 violations=0
+FUZZ[rustring]: PASS
+SPLATS[rustring]: 0
+# ringfuzz /dev/cring iterations=20000 seed=0x2
+# write   calls=4355   ok=1748   EAGAIN=869 EFAULT=1738
+# read    calls=4058   ok=2534   EFAULT=1524
+# peek    calls=5188   ok=122    EFAULT=261 EINVAL=4805
+# resize  calls=1715   ok=355    EFAULT=27 EBUSY=444 EINVAL=889
+# clear   calls=844    ok=844   
+# stats   calls=1668   ok=1267   EFAULT=401
+# bogus   calls=1708   ok=0      ENOTTY=1708
+# reopen  calls=464    ok=464   
+# ringfuzz /dev/cring: PASS iterations=20000 violations=0
+FUZZ[cring]: PASS
+SPLATS[cring]: 0

@@ -1,0 +1,11 @@
+| Attack | `rustring` | `cring` | `rustring_naive` | `cring_naive` |
+|---|---|---|---|---|
+| PEEK 5 bytes at offset 8 (only 10 stored) | EINVAL (rejected) | EINVAL (rejected) | **ACCEPTED: returned 5 bytes of out-of-range data** | **ACCEPTED: returned 5 bytes of out-of-range data** |
+| PEEK 4096 bytes from a 64-byte buffer | EINVAL (rejected) | EINVAL (rejected) | **KERNEL PANIC**<br><sub>range end index 4096 out of range for slice of length 64</sub> | **LEAK: 4096 bytes returned, 845 non-zero bytes of other kernel memory**<br><sub>KASAN report</sub> |
+| PEEK offset 2^64-1 | EINVAL (rejected) | EINVAL (rejected) | **KERNEL PANIC**<br><sub>range end index 65 out of range for slice of length 64</sub> | **ACCEPTED: returned 2 bytes of out-of-range data**<br><sub>KASAN report</sub> |
+| PEEK length 2^64-1 | EINVAL (rejected) | EINVAL (rejected) | **KERNEL PANIC**<br><sub>attempt to add with overflow</sub> | EFAULT + WARNING<br><sub>kernel WARNING</sub> |
+| RESIZE to 0, then PEEK | EINVAL (rejected) | EINVAL (rejected) | **KERNEL PANIC**<br><sub>attempt to calculate the remainder with a divisor of zero</sub> | **KERNEL PANIC**<br><sub>Unable to handle kernel NULL pointer dereference at virtual address 0000000000000010</sub> |
+| RESIZE to 2^60 bytes | EINVAL (rejected) | EINVAL (rejected) | **KERNEL PANIC**<br><sub>called `Result::unwrap()` on an `Err` value: AllocError</sub> | ENOMEM + WARNING<br><sub>kernel WARNING</sub> |
+| RESIZE while data is stored | EBUSY (rejected) | EBUSY (rejected) | **ACCEPTED: stored data silently discarded** | **ACCEPTED: stored data silently discarded** |
+| NULL / kernel / read-only user pointers | all rejected cleanly<br><sub># ringtest /dev/rustring: PASS 18/18</sub> | all rejected cleanly<br><sub># ringtest /dev/cring: PASS 18/18</sub> | all rejected cleanly<br><sub># ringtest /dev/rustring_naive: PASS 18/18</sub> | all rejected cleanly<br><sub># ringtest /dev/cring_naive: PASS 18/18</sub> |
+| 20 000 random operations | PASS<br><sub># ringfuzz /dev/rustring: PASS iterations=20000 violations=0</sub> | PASS<br><sub># ringfuzz /dev/cring: PASS iterations=20000 violations=0</sub> | **KERNEL PANIC**<br><sub>range end index 12529059304408237573 out of range for slice of length 127</sub> | FAIL<br><sub># ringfuzz /dev/cring_naive: FAIL iterations=20000 violations=21; KASAN report; kernel WARNING</sub> |

@@ -1,0 +1,6 @@
+module,ko_file_bytes,text,data,bss,in_kernel_bytes
+rustring,20936,4739,1088,112,20480
+cring,14784,2891,1288,64,12288
+rustring_naive,22616,5007,1088,112,20480
+cring_naive,14296,2733,1276,64,12288
+rr_hello,8200,1026,1088,24,12288

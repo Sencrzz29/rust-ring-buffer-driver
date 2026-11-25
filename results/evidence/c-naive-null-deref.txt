@@ -1,0 +1,30 @@
+[    1.129486] Unable to handle kernel NULL pointer dereference at virtual address 0000000000000010
+[    1.129529] Mem abort info:
+[    1.129534]   ESR = 0x0000000096000006
+[    1.129550]   EC = 0x25: DABT (current EL), IL = 32 bits
+[    1.129560]   SET = 0, FnV = 0
+[    1.129566]   EA = 0, S1PTW = 0
+[    1.129573]   FSC = 0x06: level 2 translation fault
+[    1.129588] Data abort info:
+[    1.129597]   ISV = 0, ISS = 0x00000006, ISS2 = 0x00000000
+[    1.129605]   CM = 0, WnR = 0, TnD = 0, TagAccess = 0
+[    1.129612]   GCS = 0, Overlay = 0, DirtyBit = 0, Xs = 0
+[    1.129670] user pgtable: 4k pages, 48-bit VAs, pgdp=0000000044d58000
+[    1.129684] [0000000000000010] pgd=0800000044c32403, p4d=0800000044c32403, pud=0800000044ccf403, pmd=0000000000000000
+[    1.130197] Internal error: Oops: 0000000096000006 [#1]  SMP
+[    1.131686] Modules linked in: cring_naive(O)
+[    1.132317] CPU: 2 UID: 0 PID: 92 Comm: ringctl Tainted: G           O        6.18.65-rr-perf #1 PREEMPT 
+[    1.133579] Tainted: [O]=OOT_MODULE
+[    1.133672] Hardware name: linux,dummy-virt (DT)
+[    1.133926] pstate: 80000005 (Nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+[    1.134127] pc : __arch_copy_to_user+0xfc/0x240
+[    1.134605] lr : cring_ioctl+0x324/0x3ac [cring_naive]
+[    1.135046] sp : ffff800080593d90
+[    1.135186] x29: ffff800080593dc0 x28: ffff000004d1c700 x27: 0000000000000000
+[    1.135409] x26: 0000000000000000 x25: 0000000000000000 x24: 0000000000000003
+[    1.135582] x23: 00000000ffffffe7 x22: 000000004018b504 x21: 0000ffffcaff89a0
+[    1.135718] x20: 00000000316d4420 x19: ffff000004d1c700 x18: 0000000000000000
+[    1.135850] x17: 0000000000000000 x16: ffffa9b7257ae880 x15: 0000000000000010
+[    1.136044] x14: 0000000000000000 x13: 000fffffffffffff x12: 00000000316d4420
+[    1.136267] x11: 0000000000000000 x10: 0000000000000000 x9 : 0000000000000000
+[    1.136461] x8 : 0000000000000010 x7 : 0000000000000000 x6 : 00000000316d4420

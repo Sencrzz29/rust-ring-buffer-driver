@@ -1,0 +1,45 @@
+[   11.115371] BUG: KASAN: slab-out-of-bounds in cring_ioctl+0x208/0x550 [cring_naive]
+[   11.116071] Read of size 4096 at addr ffff000009e77880 by task ringctl/94
+[   11.116136] 
+[   11.116710] CPU: 0 UID: 0 PID: 94 Comm: ringctl Tainted: G           O        6.18.65-rr-debug #1 PREEMPT 
+[   11.117121] Tainted: [O]=OOT_MODULE
+[   11.117151] Hardware name: linux,dummy-virt (DT)
+[   11.117461] Call trace:
+[   11.117591]  show_stack+0x18/0x24 (C)
+[   11.118166]  __dump_stack+0x28/0x38
+[   11.118232]  dump_stack_lvl+0x64/0x84
+[   11.118269]  print_address_description+0x90/0x218
+[   11.118302]  print_report+0x68/0x84
+[   11.118334]  kasan_report+0xb0/0x10c
+[   11.118380]  kasan_check_range+0x264/0x29c
+[   11.118398]  __kasan_check_read+0x20/0x30
+[   11.118435]  cring_ioctl+0x208/0x550 [cring_naive]
+[   11.118509]  __arm64_sys_ioctl+0x108/0x15c
+[   11.118549]  invoke_syscall+0x68/0x1a0
+[   11.118577]  el0_svc_common+0x154/0x1c4
+[   11.118644]  do_el0_svc+0x48/0x58
+[   11.118682]  el0_svc+0x5c/0x1d0
+[   11.118742]  el0t_64_sync_handler+0x68/0xdc
+[   11.118781]  el0t_64_sync+0x198/0x19c
+[   11.118969] 
+[   11.119060] Allocated by task 92:
+[   11.119192]  kasan_save_track+0x40/0x78
+[   11.119235]  kasan_save_alloc_info+0x40/0x50
+[   11.119251]  __kasan_kmalloc+0x84/0x9c
+[   11.119267]  __kvmalloc_node_noprof+0x440/0x828
+[   11.119283]  cring_ioctl+0x3c8/0x550 [cring_naive]
+[   11.119304]  __arm64_sys_ioctl+0x108/0x15c
+[   11.119321]  invoke_syscall+0x68/0x1a0
+[   11.119336]  el0_svc_common+0x154/0x1c4
+[   11.119360]  do_el0_svc+0x48/0x58
+[   11.119378]  el0_svc+0x5c/0x1d0
+[   11.119393]  el0t_64_sync_handler+0x68/0xdc
+[   11.119408]  el0t_64_sync+0x198/0x19c
+[   11.119445] 
+[   11.119502] The buggy address belongs to the object at ffff000009e77880
+[   11.119502]  which belongs to the cache kmalloc-64 of size 64
+[   11.119546] The buggy address is located 0 bytes inside of
+[   11.119546]  allocated 64-byte region [ffff000009e77880, ffff000009e778c0)
+[   11.119586] 
+[   11.119633] The buggy address belongs to the physical page:
+[   11.120171] page: refcount:0 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x49e77

@@ -5,7 +5,7 @@
 #     -k perf|debug     kernel flavour (default: perf)
 #     -r <test>         run /tests/<test> unattended, then power off
 #     -x "<args>"       arguments for that test (no commas inside an argument)
-#     -a "<args>"       extra kernel command-line arguments (e.g. panic_on_oops=1)
+#     -a "<args>"       extra kernel command-line arguments (e.g. oops=panic)
 #     -l <file>         also write the serial console to <file>
 #     -t <seconds>      kill the VM after this long (default 900 with -r, none otherwise)
 #     -g                wait for GDB on tcp::1234 (see docs) before booting

@@ -54,13 +54,20 @@ use kernel::{
 use crate::ring::check_capacity;
 use crate::ring::{RingBuf, RingError};
 
-// The same source builds two modules (see Kbuild): the real driver, and
-// `rustring_naive` (`--cfg naive`), whose PEEK and RESIZE are the unchecked
-// versions at the bottom of this file.
-#[cfg(not(naive))]
+// The same source builds three modules (see Kbuild):
+// * `rustring`        -- the real driver;
+// * `rustring_naive`  (`--cfg naive`): PEEK and RESIZE replaced by the
+//   unchecked versions at the bottom of this file;
+// * `rustring_atomic` (`--cfg atomic_bug`): the ring under a spinlock instead
+//   of a mutex -- a protocol bug the compiler accepts (see `RING` below).
+#[cfg(not(any(naive, atomic_bug)))]
 const NAME: &str = "rustring";
-#[cfg(not(naive))]
+#[cfg(not(any(naive, atomic_bug)))]
 const DEVICE_NAME: &CStr = c_str!("rustring");
+#[cfg(atomic_bug)]
+const NAME: &str = "rustring_atomic";
+#[cfg(atomic_bug)]
+const DEVICE_NAME: &CStr = c_str!("rustring_atomic");
 #[cfg(naive)]
 const NAME: &str = "rustring_naive";
 #[cfg(naive)]
@@ -96,10 +103,24 @@ struct Stats {
     rejected: u64,
 }
 
+#[cfg(not(atomic_bug))]
 kernel::sync::global_lock! {
     // SAFETY: `RING.init()` runs in `RustRingModule::init` before the misc
     // device is registered, i.e. before anything can call `RING.lock()`.
     unsafe(uninit) static RING: Mutex<RingState> = RingState { ring: None };
+}
+
+// Positive control for the debug kernel, built only into rustring_atomic.ko:
+// the same driver with the ring under a *spinlock*. It compiles without a
+// single warning -- the type system has no notion of "this call may sleep" --
+// and it even passes functional tests, because the user pages are usually
+// resident. Only CONFIG_DEBUG_ATOMIC_SLEEP reports it ("BUG: sleeping
+// function called from invalid context" from copy_to_user's might_fault()).
+// This is synopsis problem 3: protocol bugs are invisible to rustc.
+#[cfg(atomic_bug)]
+kernel::sync::global_lock! {
+    // SAFETY: as above.
+    unsafe(uninit) static RING: SpinLock<RingState> = RingState { ring: None };
 }
 
 kernel::sync::global_lock! {

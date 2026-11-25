@@ -1,0 +1,37 @@
+scenario,attack,module,outcome,detail
+peek_past_data,PEEK 5 bytes at offset 8 (only 10 stored),rustring,EINVAL (rejected),
+peek_past_data,PEEK 5 bytes at offset 8 (only 10 stored),cring,EINVAL (rejected),
+peek_past_data,PEEK 5 bytes at offset 8 (only 10 stored),rustring_naive,ACCEPTED: returned 5 bytes of out-of-range data,
+peek_past_data,PEEK 5 bytes at offset 8 (only 10 stored),cring_naive,ACCEPTED: returned 5 bytes of out-of-range data,
+peek_oob,PEEK 4096 bytes from a 64-byte buffer,rustring,EINVAL (rejected),
+peek_oob,PEEK 4096 bytes from a 64-byte buffer,cring,EINVAL (rejected),
+peek_oob,PEEK 4096 bytes from a 64-byte buffer,rustring_naive,KERNEL PANIC,range end index 4096 out of range for slice of length 64
+peek_oob,PEEK 4096 bytes from a 64-byte buffer,cring_naive,"LEAK: 4096 bytes returned, 314 non-zero bytes of other kernel memory",
+peek_off_overflow,PEEK offset 2^64-1,rustring,EINVAL (rejected),
+peek_off_overflow,PEEK offset 2^64-1,cring,EINVAL (rejected),
+peek_off_overflow,PEEK offset 2^64-1,rustring_naive,KERNEL PANIC,range end index 65 out of range for slice of length 64
+peek_off_overflow,PEEK offset 2^64-1,cring_naive,ACCEPTED: returned 2 bytes of out-of-range data,
+peek_len_overflow,PEEK length 2^64-1,rustring,EINVAL (rejected),
+peek_len_overflow,PEEK length 2^64-1,cring,EINVAL (rejected),
+peek_len_overflow,PEEK length 2^64-1,rustring_naive,KERNEL PANIC,attempt to add with overflow
+peek_len_overflow,PEEK length 2^64-1,cring_naive,EFAULT + WARNING,kernel WARNING
+resize_zero,"RESIZE to 0, then PEEK",rustring,EINVAL (rejected),
+resize_zero,"RESIZE to 0, then PEEK",cring,EINVAL (rejected),
+resize_zero,"RESIZE to 0, then PEEK",rustring_naive,KERNEL PANIC,attempt to calculate the remainder with a divisor of zero
+resize_zero,"RESIZE to 0, then PEEK",cring_naive,KERNEL PANIC,Unable to handle kernel NULL pointer dereference at virtual address 0000000000000010
+resize_huge,RESIZE to 2^60 bytes,rustring,EINVAL (rejected),
+resize_huge,RESIZE to 2^60 bytes,cring,EINVAL (rejected),
+resize_huge,RESIZE to 2^60 bytes,rustring_naive,KERNEL PANIC,called `Result::unwrap()` on an `Err` value: AllocError
+resize_huge,RESIZE to 2^60 bytes,cring_naive,ENOMEM + WARNING,kernel WARNING
+resize_busy,RESIZE while data is stored,rustring,EBUSY (rejected),
+resize_busy,RESIZE while data is stored,cring,EBUSY (rejected),
+resize_busy,RESIZE while data is stored,rustring_naive,ACCEPTED: stored data silently discarded,
+resize_busy,RESIZE while data is stored,cring_naive,ACCEPTED: stored data silently discarded,
+bad_pointers,NULL / kernel / read-only user pointers,rustring,all rejected cleanly,# ringtest /dev/rustring: PASS 18/18
+bad_pointers,NULL / kernel / read-only user pointers,cring,all rejected cleanly,# ringtest /dev/cring: PASS 18/18
+bad_pointers,NULL / kernel / read-only user pointers,rustring_naive,all rejected cleanly,# ringtest /dev/rustring_naive: PASS 18/18
+bad_pointers,NULL / kernel / read-only user pointers,cring_naive,all rejected cleanly,# ringtest /dev/cring_naive: PASS 18/18
+fuzz,20 000 random operations,rustring,PASS,# ringfuzz /dev/rustring: PASS iterations=20000 violations=0
+fuzz,20 000 random operations,cring,PASS,# ringfuzz /dev/cring: PASS iterations=20000 violations=0
+fuzz,20 000 random operations,rustring_naive,KERNEL PANIC,range end index 12529059304408237573 out of range for slice of length 127
+fuzz,20 000 random operations,cring_naive,FAIL,# ringfuzz /dev/cring_naive: FAIL iterations=20000 violations=21; kernel WARNING

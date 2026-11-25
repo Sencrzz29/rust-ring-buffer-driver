@@ -1,4 +1,6 @@
-obj-m := rustring.o rustring_naive.o
+obj-m := rustring.o rustring_naive.o rustring_atomic.o
 
 # Same driver.rs, with the unchecked PEEK/RESIZE compiled in instead.
 RUSTFLAGS_rustring_naive.o := --cfg naive
+# Same driver.rs, ring under a spinlock: positive control for the debug kernel.
+RUSTFLAGS_rustring_atomic.o := --cfg atomic_bug

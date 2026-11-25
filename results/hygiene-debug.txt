@@ -1,0 +1,38 @@
+KMEMLEAK[rustring]: cycles=100 leaks=0
+KMEMLEAK[cring]: cycles=100 leaks=0
+KMEMLEAK[rr_leak]: leaks=1 (positive control, expected >= 1)
+  | unreferenced object 0xffff00000e2f8000 (size 4096):
+  |   comm "insmod", pid 1299, jiffies 4294929739
+  |   hex dump (first 32 bytes):
+  |     5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  ZZZZZZZZZZZZZZZZ
+  |     5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  ZZZZZZZZZZZZZZZZ
+  |   backtrace (crc bbc951cc):
+  |     kmemleak_alloc+0x2c/0x38
+  |     __kmalloc_node_track_caller_noprof+0x3e4/0x734
+  |     krealloc_node_align_noprof+0xc8/0x2e0
+  |     rust_helper_krealloc_node_align+0x10/0x1c
+  |     0xffffc3f31c4a5060
+  |     do_one_initcall+0x16c/0x6a0
+  |     do_init_module+0x1d8/0x584
+  |     load_module+0x30e8/0x39a4
+  |     __arm64_sys_init_module+0x260/0x2a0
+ATOMIC[rustring]: sleep-in-atomic reports=0
+ATOMIC[rustring_atomic]: functional smoke PASS[rustring_atomic]: 10 checks
+ATOMIC[rustring_atomic]: sleep-in-atomic reports=1 (positive control, expected >= 1)
+  | [  170.402803] BUG: sleeping function called from invalid context at lib/iov_iter.c:259
+  | [  170.403079] in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 1344, name: sh
+  | [  170.403170] preempt_count: 1, expected: 0
+  | [  170.403203] RCU nest depth: 0, expected: 0
+  | [  170.403373] 1 lock held by sh/1344:
+  | [  170.403427]  #0: ffffc3f31c4a2018 (RING){+.+.}-{3:3}, at: rust_helper_spin_lock+0x10/0x1c
+  | [  170.407576] CPU: 2 UID: 0 PID: 1344 Comm: sh Tainted: G           O        6.18.65-rr-debug #1 PREEMPT 
+  | [  170.408896] Tainted: [O]=OOT_MODULE
+  | [  170.409012] Hardware name: linux,dummy-virt (DT)
+  | [  170.409309] Call trace:
+  | [  170.409502]  show_stack+0x18/0x24 (C)
+  | [  170.410428]  __dump_stack+0x28/0x38
+  | [  170.410516]  dump_stack_lvl+0x64/0x84
+  | [  170.411227]  dump_stack+0x18/0x24
+  | [  170.411288]  __might_resched+0x31c/0x4a8
+  | [  170.411673]  __might_sleep+0x94/0x110
+  | [  170.412106]  __might_fault+0x54/0xf8

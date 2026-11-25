@@ -1,0 +1,40 @@
+[    1.167245] rust_kernel: panicked at drivers/rust/driver.rs:334:23:
+[    1.167245] range end index 4096 out of range for slice of length 64
+[    1.167739] ------------[ cut here ]------------
+[    1.167753] kernel BUG at rust/helpers/bug.c:7!
+[    1.167930] Internal error: Oops - BUG: 00000000f2000800 [#1]  SMP
+[    1.168619] Modules linked in: rustring_naive(O)
+[    1.170198] CPU: 2 UID: 0 PID: 89 Comm: ringctl Tainted: G           O        6.18.65-rr-perf #1 PREEMPT 
+[    1.170465] Tainted: [O]=OOT_MODULE
+[    1.170557] Hardware name: linux,dummy-virt (DT)
+[    1.170760] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+[    1.170966] pc : rust_helper_BUG+0x0/0x4
+[    1.171420] lr : _RNvMNtCsj9bqJNU6tGA_6kernel3clkNtB2_5Hertz8from_ghz+0x0/0x34
+[    1.171561] sp : ffff800080533ca0
+[    1.171683] x29: ffff800080533cc0 x28: ffff000004d6b540 x27: 0000000000000000
+[    1.171858] x26: 0000000000000000 x25: 0000000000000000 x24: 0000000000000003
+[    1.171992] x23: 0000000000ce3420 x22: 0000000000000000 x21: 0000000000001000
+[    1.172124] x20: ffffaba6c328e000 x19: ffff800080533dd0 x18: 0000000000000000
+[    1.172256] x17: 000000000098967f x16: 0000000000000064 x15: 0000000000000003
+[    1.172387] x14: 0000000000000000 x13: ffff00003fdbe848 x12: 0000000000000003
+[    1.172522] x11: 0000000000000000 x10: 0000000000000001 x9 : 7ed5f6682175a700
+[    1.172735] x8 : 7ed5f6682175a700 x7 : 74756f2036393034 x6 : 207865646e692064
+[    1.172912] x5 : ffffaba6cdae4eb0 x4 : ffffaba6cdae4eb2 x3 : 0000000000000000
+[    1.173108] x2 : 0000000000000000 x1 : 0000000000000000 x0 : 00000000000000a0
+[    1.174283] Call trace:
+[    1.174450]  rust_helper_BUG+0x0/0x4 (P)
+[    1.174662]  _RNvNtNtCscIHVMyPnRZn_4core3num14overflow_panic3add+0x0/0x20
+[    1.174821]  _RNvNvNvNvNtCscIHVMyPnRZn_4core5slice20copy_from_slice_impl17len_mismatch_fail8do_panic7runtime+0x0/0x3c
+[    1.175041]  _RNvNtNtCscIHVMyPnRZn_4core9panicking11panic_const23panic_const_div_by_zero+0x0/0x20
+[    1.175225]  _RNvXs6_NtCs7a30E991v7T_14rustring_naive6driverNtB5_8RustRingNtNtCsj9bqJNU6tGA_6kernel10miscdevice10MiscDevice5ioctl+0x4a4/0x4c8 [rustring_naive]
+[    1.175716]  _RNvMs2_NtCsj9bqJNU6tGA_6kernel10miscdeviceINtB5_16MiscdeviceVTableNtNtCs7a30E991v7T_14rustring_naive6driver8RustRingE5ioctlB16_+0x20/0x44 [rustring_naive]
+[    1.175947]  __arm64_sys_ioctl+0x88/0xd8
+[    1.176035]  invoke_syscall+0x40/0xb8
+[    1.176154]  el0_svc_common+0xa8/0xd8
+[    1.176236]  do_el0_svc+0x1c/0x28
+[    1.176313]  el0_svc+0x3c/0x94
+[    1.176390]  el0t_64_sync_handler+0x68/0xdc
+[    1.176484]  el0t_64_sync+0x198/0x19c
+[    1.176812] Code: 9103c000 d65f03c0 d103c000 d65f03c0 (d4210000) 
+[    1.177383] ---[ end trace 0000000000000000 ]---
+[    1.177839] Kernel panic - not syncing: Oops - BUG: Fatal exception

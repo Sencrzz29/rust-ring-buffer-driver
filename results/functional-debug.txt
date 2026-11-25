@@ -1,0 +1,156 @@
+ok 1 - basic: write 100 bytes returns 100 (got 100)
+ok 2 - basic: read returns the same 100 bytes (got 100)
+ok 3 - basic: read on empty ring returns 0 (got 0)
+ok 4 - basic: zero-length write returns 0 (got 0)
+ok 5 - basic: 100-byte write into 64-byte ring stores 64 (got 64)
+ok 6 - basic: write to full ring -> EAGAIN (got -11)
+ok 7 - basic: stats report capacity 64 used 64 (got 64/64)
+ok 8 - basic: CLEAR empties the ring
+# group basic done in 0.02 s
+ok 9 - wrap: 20000 interleaved write/read cycles over the wrap point keep FIFO order (0 errors)
+# group wrap done in 3.70 s
+ok 10 - peek: every (offset, len) inside wrapped data returns the right bytes (0 errors)
+ok 11 - peek: never consumes data
+# group peek done in 0.03 s
+ok 12 - hostile: PEEK offset=0xb len=0 -> EINVAL (got -22)
+ok 13 - hostile: PEEK offset=0 len=0xb -> EINVAL (got -22)
+ok 14 - hostile: PEEK offset=0xa len=0x1 -> EINVAL (got -22)
+ok 15 - hostile: PEEK offset=0x5 len=0x6 -> EINVAL (got -22)
+ok 16 - hostile: PEEK offset=0x40 len=0 -> EINVAL (got -22)
+ok 17 - hostile: PEEK offset=0xffffffffffffffff len=0x1 -> EINVAL (got -22)
+ok 18 - hostile: PEEK offset=0x1 len=0xffffffffffffffff -> EINVAL (got -22)
+ok 19 - hostile: PEEK offset=0xffffffffffffffff len=0xffffffffffffffff -> EINVAL (got -22)
+ok 20 - hostile: PEEK offset=0x8000000000000000 len=0x8000000000000000 -> EINVAL (got -22)
+ok 21 - hostile: PEEK offset=0xfffffffffffffffb len=0x5 -> EINVAL (got -22)
+ok 22 - hostile: PEEK offset=0 len=0x1000 -> EINVAL (got -22)
+ok 23 - hostile: PEEK at exact end with len 0 is allowed
+ok 24 - hostile: PEEK of the last byte works
+ok 25 - hostile: RESIZE 0 -> EINVAL (got -22)
+ok 26 - hostile: RESIZE 0x1 -> EINVAL (got -22)
+ok 27 - hostile: RESIZE 0x3f -> EINVAL (got -22)
+ok 28 - hostile: RESIZE 0x400001 -> EINVAL (got -22)
+ok 29 - hostile: RESIZE 0x100000000 -> EINVAL (got -22)
+ok 30 - hostile: RESIZE 0x1000000000000000 -> EINVAL (got -22)
+ok 31 - hostile: RESIZE 0xffffffffffffffff -> EINVAL (got -22)
+ok 32 - hostile: RESIZE with data present -> EBUSY (got -16)
+ok 33 - hostile: data intact after all rejected calls
+ok 34 - hostile: RESIZE to the minimum (64) works
+ok 35 - hostile: RESIZE to the maximum (4 MiB) works
+# group hostile done in 0.03 s
+ok 36 - badptr: GET_STATS into NULL -> EFAULT
+ok 37 - badptr: GET_STATS into 0x1 -> EFAULT
+ok 38 - badptr: GET_STATS into a kernel address -> EFAULT
+ok 39 - badptr: GET_STATS into a read-only page -> EFAULT
+ok 40 - badptr: RESIZE from NULL -> EFAULT
+ok 41 - badptr: PEEK request at NULL -> EFAULT
+ok 42 - badptr: PEEK into NULL -> EFAULT
+ok 43 - badptr: PEEK into a kernel address -> EFAULT
+ok 44 - badptr: PEEK into a read-only page -> EFAULT
+ok 45 - badptr: read into NULL -> EFAULT
+ok 46 - badptr: read into a kernel address -> EFAULT
+ok 47 - badptr: read into a read-only page -> EFAULT
+ok 48 - badptr: failed reads consumed nothing
+ok 49 - badptr: read straddling an unmapped page: short count or EFAULT, no data lost (got 1, used 9)
+ok 50 - badptr: write from NULL -> EFAULT
+ok 51 - badptr: write from a PROT_NONE page -> EFAULT
+ok 52 - badptr: write from a kernel address -> EFAULT
+ok 53 - badptr: failed writes stored nothing
+# group badptr done in 0.05 s
+ok 54 - ioctl: unknown command 0xb500 -> ENOTTY (got -25)
+ok 55 - ioctl: unknown command 0xb505 -> ENOTTY (got -25)
+ok 56 - ioctl: unknown command 0xb57f -> ENOTTY (got -25)
+ok 57 - ioctl: unknown command 0x8004b501 -> ENOTTY (got -25)
+ok 58 - ioctl: unknown command 0x4004b503 -> ENOTTY (got -25)
+ok 59 - ioctl: unknown command 0x5401 -> ENOTTY (got -25)
+ok 60 - ioctl: unknown command 0 -> ENOTTY (got -25)
+ok 61 - ioctl: unknown command 0xffffffff -> ENOTTY (got -25)
+# group ioctl done in 0.01 s
+ok 62 - spsc: producer and consumer threads stream 8388608 bytes, every byte in order (0 errors)
+# group spsc done in 0.71 s
+ok 63 - mpmc: 4 writers, 4 readers, 1 ioctl thread: no unexpected errors (0; 1168 ioctls)
+ok 64 - mpmc: every byte written was read exactly once (8388608 written, 8388608 read)
+ok 65 - mpmc: driver counters agree with what user space saw
+# group mpmc done in 0.95 s
+ok 66 - race: CLEAR+RESIZE racing 3 I/O threads: only 0/EBUSY/EAGAIN seen (546 ok, 1454 busy, 0 bad)
+# group race done in 2.84 s
+# ringtest /dev/rustring: PASS 66/66
+SUITE[rustring]: PASS
+SPLATS[rustring]: 0
+ok 1 - basic: write 100 bytes returns 100 (got 100)
+ok 2 - basic: read returns the same 100 bytes (got 100)
+ok 3 - basic: read on empty ring returns 0 (got 0)
+ok 4 - basic: zero-length write returns 0 (got 0)
+ok 5 - basic: 100-byte write into 64-byte ring stores 64 (got 64)
+ok 6 - basic: write to full ring -> EAGAIN (got -11)
+ok 7 - basic: stats report capacity 64 used 64 (got 64/64)
+ok 8 - basic: CLEAR empties the ring
+# group basic done in 0.01 s
+ok 9 - wrap: 20000 interleaved write/read cycles over the wrap point keep FIFO order (0 errors)
+# group wrap done in 3.27 s
+ok 10 - peek: every (offset, len) inside wrapped data returns the right bytes (0 errors)
+ok 11 - peek: never consumes data
+# group peek done in 0.02 s
+ok 12 - hostile: PEEK offset=0xb len=0 -> EINVAL (got -22)
+ok 13 - hostile: PEEK offset=0 len=0xb -> EINVAL (got -22)
+ok 14 - hostile: PEEK offset=0xa len=0x1 -> EINVAL (got -22)
+ok 15 - hostile: PEEK offset=0x5 len=0x6 -> EINVAL (got -22)
+ok 16 - hostile: PEEK offset=0x40 len=0 -> EINVAL (got -22)
+ok 17 - hostile: PEEK offset=0xffffffffffffffff len=0x1 -> EINVAL (got -22)
+ok 18 - hostile: PEEK offset=0x1 len=0xffffffffffffffff -> EINVAL (got -22)
+ok 19 - hostile: PEEK offset=0xffffffffffffffff len=0xffffffffffffffff -> EINVAL (got -22)
+ok 20 - hostile: PEEK offset=0x8000000000000000 len=0x8000000000000000 -> EINVAL (got -22)
+ok 21 - hostile: PEEK offset=0xfffffffffffffffb len=0x5 -> EINVAL (got -22)
+ok 22 - hostile: PEEK offset=0 len=0x1000 -> EINVAL (got -22)
+ok 23 - hostile: PEEK at exact end with len 0 is allowed
+ok 24 - hostile: PEEK of the last byte works
+ok 25 - hostile: RESIZE 0 -> EINVAL (got -22)
+ok 26 - hostile: RESIZE 0x1 -> EINVAL (got -22)
+ok 27 - hostile: RESIZE 0x3f -> EINVAL (got -22)
+ok 28 - hostile: RESIZE 0x400001 -> EINVAL (got -22)
+ok 29 - hostile: RESIZE 0x100000000 -> EINVAL (got -22)
+ok 30 - hostile: RESIZE 0x1000000000000000 -> EINVAL (got -22)
+ok 31 - hostile: RESIZE 0xffffffffffffffff -> EINVAL (got -22)
+ok 32 - hostile: RESIZE with data present -> EBUSY (got -16)
+ok 33 - hostile: data intact after all rejected calls
+ok 34 - hostile: RESIZE to the minimum (64) works
+ok 35 - hostile: RESIZE to the maximum (4 MiB) works
+# group hostile done in 0.02 s
+ok 36 - badptr: GET_STATS into NULL -> EFAULT
+ok 37 - badptr: GET_STATS into 0x1 -> EFAULT
+ok 38 - badptr: GET_STATS into a kernel address -> EFAULT
+ok 39 - badptr: GET_STATS into a read-only page -> EFAULT
+ok 40 - badptr: RESIZE from NULL -> EFAULT
+ok 41 - badptr: PEEK request at NULL -> EFAULT
+ok 42 - badptr: PEEK into NULL -> EFAULT
+ok 43 - badptr: PEEK into a kernel address -> EFAULT
+ok 44 - badptr: PEEK into a read-only page -> EFAULT
+ok 45 - badptr: read into NULL -> EFAULT
+ok 46 - badptr: read into a kernel address -> EFAULT
+ok 47 - badptr: read into a read-only page -> EFAULT
+ok 48 - badptr: failed reads consumed nothing
+ok 49 - badptr: read straddling an unmapped page: short count or EFAULT, no data lost (got 1, used 9)
+ok 50 - badptr: write from NULL -> EFAULT
+ok 51 - badptr: write from a PROT_NONE page -> EFAULT
+ok 52 - badptr: write from a kernel address -> EFAULT
+ok 53 - badptr: failed writes stored nothing
+# group badptr done in 0.02 s
+ok 54 - ioctl: unknown command 0xb500 -> ENOTTY (got -25)
+ok 55 - ioctl: unknown command 0xb505 -> ENOTTY (got -25)
+ok 56 - ioctl: unknown command 0xb57f -> ENOTTY (got -25)
+ok 57 - ioctl: unknown command 0x8004b501 -> ENOTTY (got -25)
+ok 58 - ioctl: unknown command 0x4004b503 -> ENOTTY (got -25)
+ok 59 - ioctl: unknown command 0x5401 -> ENOTTY (got -25)
+ok 60 - ioctl: unknown command 0 -> ENOTTY (got -25)
+ok 61 - ioctl: unknown command 0xffffffff -> ENOTTY (got -25)
+# group ioctl done in 0.01 s
+ok 62 - spsc: producer and consumer threads stream 8388608 bytes, every byte in order (0 errors)
+# group spsc done in 0.60 s
+ok 63 - mpmc: 4 writers, 4 readers, 1 ioctl thread: no unexpected errors (0; 1276 ioctls)
+ok 64 - mpmc: every byte written was read exactly once (8388608 written, 8388608 read)
+ok 65 - mpmc: driver counters agree with what user space saw
+# group mpmc done in 0.87 s
+ok 66 - race: CLEAR+RESIZE racing 3 I/O threads: only 0/EBUSY/EAGAIN seen (509 ok, 1491 busy, 0 bad)
+# group race done in 2.56 s
+# ringtest /dev/cring: PASS 66/66
+SUITE[cring]: PASS
+SPLATS[cring]: 0

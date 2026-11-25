@@ -18,8 +18,8 @@ Design and phases: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 | 2 Panic-free ring-buffer core (`ringbuf-core/`) + host tests | done |
 | 3 Rust driver `/dev/rustring` (+ `ringctl` tool, smoke test: 16/16 on the board) | done |
 | 4 C driver `/dev/cring` + deliberately naive builds of both (`*_naive`) | done |
-| 5 Tests, fuzzing, benchmarks | next |
-| 6 Results & documentation | — |
+| 5 Tests, fuzzing, crash matrix, sizes, benchmarks (`results/`) | done |
+| 6 Results & documentation | next |
 
 ## Quick start
 

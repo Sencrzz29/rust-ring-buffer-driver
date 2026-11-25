@@ -8,7 +8,7 @@ CFLAGS  := -O2 -Wall -Wextra -Werror -static -I../include
 LDLIBS  := -lpthread
 
 BUILD   := build
-PROGS   := ringctl
+PROGS   := ringctl ringtest ringfuzz ringbench
 
 all: $(addprefix $(BUILD)/,$(PROGS))
 
