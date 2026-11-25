@@ -1,0 +1,13 @@
+[package]
+name = "ringbuf-core"
+version = "0.1.0"
+edition = "2021"          # same edition the kernel compiles modules with
+license = "GPL-2.0"
+publish = false
+description = "Panic-free circular byte buffer shared by the rustring kernel driver and its host tests"
+
+[dependencies]
+# none: the library is `no_std` and depends only on `core`
+
+[dev-dependencies]
+proptest = "1"

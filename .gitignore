@@ -13,9 +13,8 @@ Module.symvers
 modules.order
 .tmp_versions/
 
-# Cargo (host-side unit tests)
+# Cargo (host-side unit tests). Cargo.lock IS committed for reproducible tests.
 target/
-Cargo.lock
 
 # Userspace test binaries
 /userspace/build/
