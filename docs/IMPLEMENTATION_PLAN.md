@@ -1,5 +1,7 @@
 # Implementation Plan — Panic-Resilient Ring-Buffer Driver in Safe Rust
 
+> **Status: complete.** All phases 0–6 are done; see [RESULTS.md](RESULTS.md). This document is kept as the original plan. Deviations made during implementation: the crash matrix uses the boot parameter `oops=panic` (the equivalent of `panic_on_oops=1`), and two positive-control modules were added (`rustring_atomic`, `rr_leak`) to prove the debug-kernel checkers fire.
+
 Project: *Securing Embedded Linux Device Drivers: A Safe Rust Framework and Protocol
 Invariant Implementation* (ECE Mini Project 2026–27, Gaurav Gupta & Sujeet Venkata Raman).
 
