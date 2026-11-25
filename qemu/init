@@ -3,6 +3,7 @@
 #
 # Kernel command line knobs:
 #   rr.run=<name>   run /tests/<name> unattended, print a result marker, power off
+#   rr.args=a,b,c   arguments for that test (commas become spaces)
 #   (absent)        drop into an interactive shell on the serial console
 
 export PATH=/sbin:/usr/sbin:/bin:/usr/bin:/tests
@@ -15,11 +16,16 @@ mount -t debugfs  debugfs  /sys/kernel/debug 2>/dev/null
 hostname rr-board
 
 echo "rr: booted $(uname -r) on $(grep -c ^processor /proc/cpuinfo) CPUs"
+# On the debug kernel, prove the runtime checkers are really active.
+dmesg | grep -E "KernelAddressSanitizer initialized|Lock dependency validator|kmemleak: Kernel memory leak detector" \
+    | sed 's/^\[[ 0-9.]*\] /rr: checker: /'
 
 run=$(sed -n 's/.*rr\.run=\([^ ]*\).*/\1/p' /proc/cmdline)
+args=$(sed -n 's/.*rr\.args=\([^ ]*\).*/\1/p' /proc/cmdline | tr ',' ' ')
 if [ -n "$run" ]; then
-    echo "rr: running /tests/$run"
-    sh "/tests/$run"
+    echo "rr: running /tests/$run $args"
+    # shellcheck disable=SC2086 # word splitting of $args is intended
+    sh "/tests/$run" $args
     echo "RR-RESULT: $run exit=$?"
     sync
     poweroff -f

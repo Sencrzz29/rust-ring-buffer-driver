@@ -50,10 +50,21 @@ use kernel::{
     uaccess::{UserPtr, UserSlice},
 };
 
-use crate::ring::{check_capacity, RingBuf, RingError};
+#[cfg(not(naive))]
+use crate::ring::check_capacity;
+use crate::ring::{RingBuf, RingError};
 
+// The same source builds two modules (see Kbuild): the real driver, and
+// `rustring_naive` (`--cfg naive`), whose PEEK and RESIZE are the unchecked
+// versions at the bottom of this file.
+#[cfg(not(naive))]
 const NAME: &str = "rustring";
+#[cfg(not(naive))]
 const DEVICE_NAME: &CStr = c_str!("rustring");
+#[cfg(naive)]
+const NAME: &str = "rustring_naive";
+#[cfg(naive)]
+const DEVICE_NAME: &CStr = c_str!("rustring_naive");
 
 /// Capacity at load time (64 KiB) -- `RB_DEFAULT_CAPACITY` in the uapi header.
 const DEFAULT_CAPACITY: usize = 65_536;
@@ -210,6 +221,7 @@ fn clear() -> Result<isize> {
     Ok(0)
 }
 
+#[cfg(not(naive))]
 fn resize(arg: usize) -> Result<isize> {
     let requested: u64 = UserSlice::new(UserPtr::from_addr(arg), size_of::<u64>())
         .reader()
@@ -228,6 +240,7 @@ fn resize(arg: usize) -> Result<isize> {
     Ok(0)
 }
 
+#[cfg(not(naive))]
 fn peek(arg: usize) -> Result<isize> {
     let mut req = UserSlice::new(UserPtr::from_addr(arg), size_of::<[u64; 3]>()).reader();
     let offset: u64 = req.read()?;
@@ -248,6 +261,60 @@ fn peek(arg: usize) -> Result<isize> {
     out.write_slice(first)?;
     out.write_slice(second)?;
     Ok(result)
+}
+
+// ---------------------------------------------------------------------------
+// Deliberately naive PEEK / RESIZE -- only in rustring_naive.ko.
+//
+// This is unchecked C ported line by line: no range checks, plain `+` and
+// `%`, `buf[a..b]`, `.unwrap()`. Rust still refuses to read out of bounds or
+// let an overflow wrap -- but it enforces that by *panicking*, and a panic in
+// the kernel is BUG(): an oops that kills the caller while it holds RING's
+// mutex (so every later user of the device hangs), or, with
+// panic_on_oops=1 as on Android/embedded boards, a kernel panic.
+//
+// These two functions break the lint rules on purpose, so the rules are
+// switched off for them alone. Compare with the real versions above.
+// ---------------------------------------------------------------------------
+
+#[cfg(naive)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects,
+    clippy::unwrap_used
+)]
+fn resize(arg: usize) -> Result<isize> {
+    let requested: u64 = UserSlice::new(UserPtr::from_addr(arg), size_of::<u64>())
+        .reader()
+        .read()?;
+    // No bounds check, and allocation failure "can't happen".
+    let storage = KVVec::from_elem(0u8, requested as usize, GFP_KERNEL).unwrap();
+    // No busy check: stored data is silently discarded.
+    RING.lock().ring = Some(RingBuf::new(storage));
+    Ok(0)
+}
+
+#[cfg(naive)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects,
+    clippy::unwrap_used
+)]
+fn peek(arg: usize) -> Result<isize> {
+    let mut req = UserSlice::new(UserPtr::from_addr(arg), size_of::<[u64; 3]>()).reader();
+    let offset = req.read::<u64>()? as usize;
+    let len = req.read::<u64>()? as usize;
+    let buf = req.read::<u64>()? as usize;
+
+    let state = RING.lock();
+    let ring = state.ring.as_ref().unwrap();
+    let (storage, head, _used) = ring.raw_parts();
+    let start = (head + offset) % storage.len(); // overflow, or % 0 -> panic
+    let src = &storage[start..start + len]; // past the buffer -> panic
+    UserSlice::new(UserPtr::from_addr(buf), len)
+        .writer()
+        .write_slice(src)?;
+    Ok(len as isize)
 }
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,4 @@
+obj-m := cring.o cring_naive.o
+
+# Same source, validation removed (see the CRING_NAIVE blocks in cring.c).
+CFLAGS_cring_naive.o := -DCRING_NAIVE

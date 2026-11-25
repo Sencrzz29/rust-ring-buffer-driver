@@ -1,1 +1,4 @@
-obj-m := rustring.o
+obj-m := rustring.o rustring_naive.o
+
+# Same driver.rs, with the unchecked PEEK/RESIZE compiled in instead.
+RUSTFLAGS_rustring_naive.o := --cfg naive

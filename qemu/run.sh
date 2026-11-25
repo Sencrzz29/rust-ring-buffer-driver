@@ -4,6 +4,7 @@
 #   qemu/run.sh [options]
 #     -k perf|debug     kernel flavour (default: perf)
 #     -r <test>         run /tests/<test> unattended, then power off
+#     -x "<args>"       arguments for that test (no commas inside an argument)
 #     -a "<args>"       extra kernel command-line arguments (e.g. panic_on_oops=1)
 #     -l <file>         also write the serial console to <file>
 #     -t <seconds>      kill the VM after this long (default 900 with -r, none otherwise)
@@ -14,12 +15,12 @@
 set -euo pipefail
 source "$(dirname "$0")/../env/common.sh"
 
-flavour=perf run= append= log= tmo= gdb= rebuild=1
-while getopts "k:r:a:l:t:gn" o; do
+flavour=perf run= targs= append= log= tmo= gdb= rebuild=1
+while getopts "k:r:x:a:l:t:gn" o; do
     case $o in
-        k) flavour=$OPTARG ;;  r) run=$OPTARG ;;  a) append=$OPTARG ;;
+        k) flavour=$OPTARG ;;  r) run=$OPTARG ;;  x) targs=$OPTARG ;;  a) append=$OPTARG ;;
         l) log=$OPTARG ;;      t) tmo=$OPTARG ;;  g) gdb=1 ;;  n) rebuild= ;;
-        *) sed -n '2,15p' "$0"; exit 2 ;;
+        *) sed -n '2,14p' "$0"; exit 2 ;;
     esac
 done
 
@@ -28,6 +29,7 @@ kdir=$(kbuild_dir "$flavour")
 
 cmdline="console=ttyAMA0 rdinit=/init panic=-1 loglevel=6"
 [[ -n $run ]] && cmdline+=" rr.run=$run"
+[[ -n $targs ]] && cmdline+=" rr.args=${targs// /,}"
 [[ $flavour == debug ]] && cmdline+=" kmemleak=on"
 [[ -n $append ]] && cmdline+=" $append"
 

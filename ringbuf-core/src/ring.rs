@@ -149,6 +149,15 @@ where
         self.storage
     }
 
+    /// Read-only view `(storage, head, len)`.
+    ///
+    /// Only the deliberately naive comparison build of the driver uses this,
+    /// to re-implement PEEK the way unchecked C code would. It hands out
+    /// shared references only, so it cannot break the ring's invariants.
+    pub fn raw_parts(&self) -> (&[u8], usize, usize) {
+        (&self.storage, self.head, self.len)
+    }
+
     /// Physical index of the byte `offset` positions after the read head.
     fn phys(&self, offset: usize) -> Result<usize, RingError> {
         self.head

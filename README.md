@@ -17,8 +17,8 @@ Design and phases: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 | 1 Linux 6.18.65 ARM64 kernels with `CONFIG_RUST=y`, BusyBox initramfs, QEMU board | done (perf kernel; debug kernel builds with the same script) |
 | 2 Panic-free ring-buffer core (`ringbuf-core/`) + host tests | done |
 | 3 Rust driver `/dev/rustring` (+ `ringctl` tool, smoke test: 16/16 on the board) | done |
-| 4 C driver + naive variants | next |
-| 5 Tests, fuzzing, benchmarks | — |
+| 4 C driver `/dev/cring` + deliberately naive builds of both (`*_naive`) | done |
+| 5 Tests, fuzzing, benchmarks | next |
 | 6 Results & documentation | — |
 
 ## Quick start
@@ -45,9 +45,28 @@ Build the modules and tools, then boot the board:
 bash scripts/build-modules.sh perf       # every drivers/*/ against the perf kernel
 make -C userspace                        # static ARM64 tools -> /tests on the board
 bash qemu/run.sh                         # interactive shell on the emulated board
-bash qemu/run.sh -r rustring_smoke.sh    # run a test unattended and power off
-bash qemu/run.sh -k debug                # same, on the debug kernel
+bash qemu/run.sh -r smoke_all.sh         # run a test unattended and power off
+bash qemu/run.sh -k debug -r smoke_all.sh            # same, on the KASAN/lockdep kernel
+bash qemu/run.sh -r oob_peek.sh -x "rustring cring cring_naive rustring_naive"
 ```
+
+The four modules (same ABI, `include/uapi/ringbuf.h`):
+
+| Module | What it is |
+|---|---|
+| `rustring.ko` | the deliverable: safe Rust, lint-enforced panic-free rules |
+| `cring.ko` | the same driver in careful C (fair baseline for size/speed) |
+| `rustring_naive.ko` | `--cfg naive`: PEEK/RESIZE ported from unchecked C (`buf[a..b]`, `+`, `.unwrap()`) |
+| `cring_naive.ko` | `-DCRING_NAIVE`: PEEK/RESIZE without range/busy checks |
+
+Preview of the out-of-bounds PEEK attack (64-byte buffer, ask for 4096 bytes):
+
+| Module | Result | Afterwards |
+|---|---|---|
+| `rustring` | `EINVAL` | usable |
+| `cring` | `EINVAL` | usable |
+| `cring_naive` | returns 4096 bytes, ~570 of them **other kernel heap memory**; silent on the perf kernel, `BUG: KASAN: slab-out-of-bounds` on the debug kernel | usable (the leak goes unnoticed) |
+| `rustring_naive` | Rust refuses the out-of-bounds read by **panicking** → `kernel BUG` → Oops, caller killed | **hung**: the dead task still holds the ring mutex |
 
 On the board (`/tests` is on `PATH`):
 
