@@ -1,0 +1,28 @@
+#!/bin/sh
+# PID 1 of the emulated board (BusyBox ash).
+#
+# Kernel command line knobs:
+#   rr.run=<name>   run /tests/<name> unattended, print a result marker, power off
+#   (absent)        drop into an interactive shell on the serial console
+
+mount -t proc     proc     /proc
+mount -t sysfs    sysfs    /sys
+mount -t devtmpfs devtmpfs /dev
+mount -t tmpfs    tmpfs    /tmp
+mount -t debugfs  debugfs  /sys/kernel/debug 2>/dev/null
+hostname rr-board
+
+echo "rr: booted $(uname -r) on $(grep -c ^processor /proc/cpuinfo) CPUs"
+
+run=$(sed -n 's/.*rr\.run=\([^ ]*\).*/\1/p' /proc/cmdline)
+if [ -n "$run" ]; then
+    echo "rr: running /tests/$run"
+    sh "/tests/$run"
+    echo "RR-RESULT: $run exit=$?"
+    sync
+    poweroff -f
+fi
+
+echo "rr: interactive shell (modules in /modules, tests in /tests; 'poweroff -f' to quit)"
+setsid cttyhack sh -l
+poweroff -f
