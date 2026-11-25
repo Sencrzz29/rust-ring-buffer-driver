@@ -15,7 +15,7 @@ export tmo=$([[ $flavour == debug ]] && echo 300 || echo 120)
 rm -rf "$logdir"
 mkdir -p "$logdir" "$REPO/results"
 
-"$REPO/qemu/mkinitramfs.sh" "$flavour" > /dev/null
+bash "$REPO/qemu/mkinitramfs.sh" "$flavour" > /dev/null
 
 modules="rustring cring rustring_naive cring_naive"
 scenarios="peek_past_data peek_oob peek_off_overflow peek_len_overflow resize_zero resize_huge resize_busy bad_pointers fuzz"

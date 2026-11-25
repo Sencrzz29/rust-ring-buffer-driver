@@ -25,7 +25,7 @@ while getopts "k:r:x:a:l:t:gn" o; do
 done
 
 kdir=$(kbuild_dir "$flavour")
-[[ -n $rebuild ]] && "$REPO/qemu/mkinitramfs.sh" "$flavour" >&2
+[[ -n $rebuild ]] && bash "$REPO/qemu/mkinitramfs.sh" "$flavour" >&2
 
 cmdline="console=ttyAMA0 rdinit=/init panic=-1 loglevel=6"
 [[ -n $run ]] && cmdline+=" rr.run=$run"
