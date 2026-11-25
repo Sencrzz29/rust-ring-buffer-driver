@@ -9,7 +9,8 @@ Invariant Implementation* — Gaurav Gupta (1NT24EC048), Sujeet Venkata Raman (1
 
 | Document | Contents |
 |---|---|
-| [docs/RESULTS.md](docs/RESULTS.md) | all measurements and what they mean |
+| [results/REPORT.md](results/REPORT.md) | short report on the experimental results (start here) |
+| [docs/RESULTS.md](docs/RESULTS.md) | all measurements and what they mean, in detail |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | build pipeline, driver layers, data structure, locking |
 | [docs/VIVA_NOTES.md](docs/VIVA_NOTES.md) | demo script and answers to likely questions |
 | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | the original plan and design decisions |
